@@ -6,7 +6,6 @@ import Sidebar from "../components/sidebar/Sidebar.vue";
 import Li from "../components/sidebar/Li.vue";
 import Navbar from "../components/navbar/Navbar.vue"
 import Content from "../components/shared/Content.vue"
-import Card from '../components/shared/Card.vue'
 import AdminTable from '../components/admin/AdminTable.vue'
 
 
@@ -22,22 +21,38 @@ import AdminTable from '../components/admin/AdminTable.vue'
       </template>
 
       <template #links>
-        <Li> Dashboard </Li>
-        <Li> Dashboard </Li>
-        <Li> Dashboard </Li>
-        <Li> Dashboard </Li>
-        <Li> Dashboard </Li>
+
+        <Li> 
+          <router-link :to="{name: 'dashboard'}">
+            Dashboard
+          </router-link>  
+        </Li>
+
+        <Li> 
+          <router-link :to="{name: 'hotels'}">
+            Hotels
+          </router-link>  
+        </Li>
+
+        <Li> 
+          <router-link :to="{name: 'bookings'}">
+            Bookings
+          </router-link>  
+        </Li>
+
       </template>
     </Sidebar>
 
     <Navbar></Navbar>
 
     <Content>
-      <Card>
+      <!-- <Card>
 
         <AdminTable />
 
-      </Card>
+      </Card> -->
+
+      <router-view />
     </Content>
   
   </div>

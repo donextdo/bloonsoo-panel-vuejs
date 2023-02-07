@@ -10,8 +10,9 @@
       bg-slate-900
       hover:bg-slate-700
       text-sm
-      font-notmal
+      font-normal
       cursor-pointer
+      flex items-center gap-2
     "
   >
     <slot></slot>

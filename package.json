@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@vue/cli-service": "^5.0.8",
+    "axios": "^1.2.3",
     "vue": "^3.2.41",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"

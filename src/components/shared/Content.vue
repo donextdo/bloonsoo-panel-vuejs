@@ -2,7 +2,7 @@
     
 <div class="content ml-56 mt-20 p-6 flex flex-col">
 
-    <div class="w-full flex items-center justify-between mb-4">
+    <!-- <div class="w-full flex items-center justify-between mb-4">
 
         <h4 class="font-semibold text-base text-gray-800">
             Dashboard
@@ -12,7 +12,7 @@
             dashboard > dashboard
         </h4>
 
-    </div>
+    </div> -->
 
     <slot></slot>
 </div>

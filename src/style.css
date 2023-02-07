@@ -18,3 +18,12 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #374151;
 }
+
+@layer components {
+    .login-section {
+        @apply h-screen grid grid-cols-2;
+        background-image: url('./assets/hero.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+}
