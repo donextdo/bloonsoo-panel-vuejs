@@ -30,7 +30,6 @@ export default createStore({
             'authorization': `Bearer ${localStorage.getItem('token')}`
           }
         })
-        console.log(data)
         commit('setUser', data)
 
       } catch (error) {

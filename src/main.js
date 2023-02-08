@@ -4,6 +4,11 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from 'axios'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+
+library.add( fas )
 
 let development = process.env.NODE_ENV !== 'production'
 
@@ -12,6 +17,7 @@ const axiosInstance = axios.create({
 })
 
 createApp(App)
+    .component('font-awesome-icon', FontAwesomeIcon)
     .use(store)
     .use(router)
     .provide('axios', axiosInstance)

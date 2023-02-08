@@ -2,8 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
-import HotelsView from '../views/HotelsView.vue'
+// import HotelsView from '../views/HotelsView.vue'
 import BookingView from '../views/BookingView.vue'
+import hotelRoutes from '../views/HotelsView'
 import store from '../store'
 
 const routes = [
@@ -21,15 +22,11 @@ const routes = [
     },
     children: [
       {
-        path: '/',
+        path: '',
         name: 'dashboard',
         component: DashboardView
       },
-      {
-        path: '/hotels',
-        name: 'hotels',
-        component: HotelsView
-      },
+      ...hotelRoutes,
       {
         path: '/bookings',
         name: 'bookings',

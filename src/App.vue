@@ -13,7 +13,6 @@ onMounted( async () => {
   catch(error) {
     console.log(error)
   }
-  
 })
 
 </script>
