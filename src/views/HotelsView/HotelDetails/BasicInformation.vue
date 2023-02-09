@@ -2,13 +2,18 @@
 
 import RouteNavigationBar from '../../../components/navbar/RouteNavigationBar.vue';
 import MazPhoneNumberInput from 'maz-ui/components/MazPhoneNumberInput'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import '../../../assets/css/phoneNumberInput.css'
 import FormCard from '../../../components/shared/FormCard.vue';
 import TextInput from '../../../components/shared/FormControls/TextInput.vue';
 import DropDown from '../../../components/shared/FormControls/DropDown.vue';
 import RadioGroup from '../../../components/shared/FormControls/RadioGroup.vue';
 import TextArea from '../../../components/shared/FormControls/TextArea.vue';
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
+
+const store = useStore()
+const { currentHotel } = store.state
 
 const propertyName = ref('')
 const propertyNameError = ref(false)
@@ -43,6 +48,19 @@ const postalCodeError = ref(false)
 const about = ref('')
 const aboutError = ref(false)
 
+
+const setDefaults = () => {
+    propertyName.value = currentHotel?.property_name
+    startRating.value = currentHotel?.star_rating
+    contactName.value = currentHotel?.contact_name
+    phoneNumberRes.value = currentHotel?.ccontact_phone_number
+    about.value = currentHotel.about
+}
+
+onMounted(() => {
+    if(currentHotel) setDefaults()
+    
+})
 
 </script>
 

@@ -9,16 +9,25 @@ const baseUrl = development ? 'http://localhost:9000' :' http://api.marriextrans
 export default createStore({
   state: {
     user: null,
+    currentHotel: null,
   },
   getters: {
     getToken() {
       const token = localStorage.getItem('token')
       return token
+    },
+
+    getCurrentHotel(state) {
+      return state.currentHotel
     }
   },
   mutations: {
     setUser(state, payload) {
       state.user = payload
+    },
+    
+    setCurrentHotel(state, payload) {
+      state.currentHotel = payload
     }
   },
   actions: {
@@ -34,6 +43,18 @@ export default createStore({
 
       } catch (error) {
         commit('setUser', null)
+      }
+    },
+
+    async getCurrentHotel({commit}, id) {
+      try {
+        
+        const {data} = await axios.get(`${baseUrl}/api/hotel/${id}`)
+
+        commit('setCurrentHotel', data)
+
+      } catch (error) {
+        commit('setCurrentHotel', null)
       }
     }
   },

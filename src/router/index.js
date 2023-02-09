@@ -52,6 +52,26 @@ router.beforeEach(async (to, from, next) => {
   }
   else next()
 
+})  
+
+router.beforeEach(async (to, from, next) => {
+
+  const { currentHotel } = store.state
+
+  if(
+    (
+      to.name === 'basicInformation' ||
+      to.name === 'facilities' ||
+      to.name === 'images' ||
+      to.name === 'policies' ||
+      to.name === 'payments'
+    ) 
+    && to.params.id && currentHotel?._id !== to.params.id ) 
+  {
+    await store.dispatch('getCurrentHotel', to.params.id)
+    next()
+  }
+  else next()
 })
 
 export default router
