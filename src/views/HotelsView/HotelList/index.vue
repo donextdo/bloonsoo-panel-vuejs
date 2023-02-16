@@ -80,7 +80,7 @@ const getStatusColor = (status) => {
             <TableRow v-for="(hotel, index) in hotels" :key="index">
 
                 <TableCell>
-                    <a :href="`${frontUrl}/hotel/${hotel._id}`" target="_blank" 
+                    <a :href="`${frontUrl}/hotels/${hotel._id}`" target="_blank" 
                     rel="noopener noreferrer" 
                     class="text-blue-900 font-semibold">
                         {{ hotel.property_name }}
