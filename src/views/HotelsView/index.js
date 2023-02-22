@@ -6,6 +6,7 @@ import Facilities from './HotelDetails/Facilities.vue'
 import Images from './HotelDetails/Images.vue'
 import Policies from './HotelDetails/Policies.vue'
 import Payments from './HotelDetails/Payments.vue'
+import RoomListByHotel from './RoomListByHotel/index.vue'
 
 const hotelRoutes = [
     {
@@ -55,6 +56,11 @@ const hotelRoutes = [
                         component: Payments
                     }
                 ]
+            },
+            {
+                path: 'rooms/:id',
+                name: 'roomListByHotel',
+                component: RoomListByHotel
             }
         ]
     }

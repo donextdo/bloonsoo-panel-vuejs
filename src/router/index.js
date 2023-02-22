@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 // import HotelsView from '../views/HotelsView.vue'
 import BookingView from '../views/BookingView.vue'
+import CommissionView from '../views/CommissionView/CommissionView.vue'
 import hotelRoutes from '../views/HotelsView'
 import store from '../store'
 
@@ -32,6 +33,11 @@ const routes = [
         name: 'bookings',
         component: BookingView
       },
+      {
+        path: '/commission',
+        name: 'commission',
+        component: CommissionView
+      }
     ]
   }
 ]

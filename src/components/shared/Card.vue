@@ -12,7 +12,7 @@ defineProps({
 
 <template>
     
-    <div class="w-full px-6 py-10 bg-white shadow-md">
+    <div class="w-full px-6 py-10 bg-white shadow-md relative">
 
         <h3 v-if="title" class="text-lg font-semibold text-gray-800">
             {{ title }}

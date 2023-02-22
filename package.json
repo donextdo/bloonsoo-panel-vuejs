@@ -17,6 +17,8 @@
     "axios": "^1.2.3",
     "libphonenumber-js": "^1.10.14",
     "maz-ui": "^3.0.8",
+    "tailwind-scrollbar": "^2.1.0",
+    "tailwind-scrollbar-hide": "^1.1.7",
     "vue": "^3.2.41",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"

@@ -6,8 +6,14 @@ import Sidebar from "../components/sidebar/Sidebar.vue";
 import Li from "../components/sidebar/Li.vue";
 import Navbar from "../components/navbar/Navbar.vue"
 import Content from "../components/shared/Content.vue"
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router';
 
-const sidebarItems = ref([
+const store = useStore()
+const { user } = store.state
+const router = useRouter()
+
+const sidebarItems = ref( user.role == 'admin' ? [
   {
     title: 'Dashboard',
     icon: 'fa-solid fa-chart-line',
@@ -23,12 +29,41 @@ const sidebarItems = ref([
     icon: 'fa-solid fa-bookmark',
     route: 'bookings'
   },
+  // {
+  //   title: 'Users',
+  //   icon: 'fa-solid fa-users',
+  //   route: 'dashboard'
+  // },
   {
-    title: 'Users',
-    icon: 'fa-solid fa-users',
+    title: 'Commission',
+    icon: 'fa-solid fa-coins',
+    route: 'commission'
+  }
+] : 
+[
+  {
+    title: 'Dashboard',
+    icon: 'fa-solid fa-chart-line',
     route: 'dashboard'
   },
+  {
+    title: 'Hotels',
+    icon: 'fa-solid fa-hotel',
+    route: 'hotels'
+  },
+  {
+    title: 'Bookings',
+    icon: 'fa-solid fa-bookmark',
+    route: 'bookings'
+  }
 ])
+
+
+const logout = () => {
+  store.commit('setUser', null)
+  localStorage.removeItem('token')
+  router.push({name: 'login'})
+}
 
 
 </script>
@@ -63,7 +98,23 @@ const sidebarItems = ref([
       </template>
     </Sidebar>
 
-    <Navbar></Navbar>
+    <Navbar>
+
+      <div class="w-full h-full flex items-center justify-between">
+        <h4 class="text-base text-gray-600 font-semibold">
+          {{ user.role == 'admin' ? 'ADMIN' : 'HOTEL ADMIN' }}
+        </h4>
+
+
+        <button 
+        @click="logout"
+        class="py-2 px-6 bg-slate-800 text-white text-sm font-semibold rounded-md">
+          Logout
+        </button>
+
+      </div>
+
+    </Navbar>
 
     <Content>
       <!-- <Card>
