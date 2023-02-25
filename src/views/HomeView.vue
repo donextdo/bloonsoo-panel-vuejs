@@ -74,7 +74,7 @@ const logout = () => {
 
     <Sidebar>
       <template #logo>
-        <h1 class="font-bold text-4xl">LOGO</h1>
+        <img src="../assets/logo.png" alt="" class="w-4/5 object-contain">
       </template>
 
       <template #links>

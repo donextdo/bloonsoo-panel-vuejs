@@ -36,7 +36,6 @@ async function fetchHotels() {
             }
         })
         hotels.value = data
-        console.log(data)
         loading.value = false
     } catch (error) {
         console.log(error)
