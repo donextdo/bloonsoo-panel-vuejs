@@ -14,7 +14,7 @@ const store = useStore()
 const { user } = store.state
 
 const hotels = ref([])
-const loading = ref(false)
+const loading = ref(false)  
 const showAddHotelAdmin = ref(false)
 
 onMounted( async () => {
@@ -167,11 +167,11 @@ const toggleAddHotelAdmin = () => {
 
                 <TableCell>
                     <div class="w-full flex items-center gap-3">
-                        <!-- <router-link 
+                        <router-link 
                         :to="{name: 'hotelDetails', params: {id: hotel._id}}"
                         class="px-4 py-1 text-xs font-semibold bg-gray-800 text-white rounded-md">
                             View
-                        </router-link> -->
+                        </router-link>
 
                         <router-link 
                         :to="{name: 'roomListByHotel', params: {id: hotel._id}}"

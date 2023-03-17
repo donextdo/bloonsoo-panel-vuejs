@@ -1,8 +1,18 @@
 <script setup>
 
-import { ref } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import RouteNavigationBar from '../../../components/navbar/RouteNavigationBar.vue';
 import FormCard from '../../../components/shared/FormCard.vue';
+import ButtonSpinner from '../../../components/Spinner/ButtonSpinner.vue';
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
+import { useToast } from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+
+const store = useStore()
+const axios = inject('axios')
+const toast = useToast()
+const { currentHotel } = store.state
 
 const image = ref(null)
 const imageValue = ref('')
@@ -11,70 +21,162 @@ const preview = ref('')
 const images = ref(null)
 const previews = ref([])
 
-// const onChange = async (event) => {
-//     var input = event.target;
-//     if (input.files) {
+const editMode = ref(false)
+const loading = ref(false)
 
-//         image.value = input.files[0];
+const setDefaults = () => {
+    preview.value = currentHotel?.cover_image
+    image.value = currentHotel?.cover_image
+    previews.value = currentHotel?.gallery_images
+    images.value = currentHotel?.gallery_images
+}
 
-//         let formData = new FormData()
+onMounted(() => {
+    console.log(currentHotel)
+    if(currentHotel) setDefaults()
+})
 
-//         formData.append('cover_img', image.value)
+const onChange = async (event) => {
+    var input = event.target;
+    if (input.files) {
 
-//         const hotel = await $fetch( `${baseUrl}/api/hotel/coverphoto/${hotelId.value}`, {
-//             method: 'PATCH',
-//             body: formData,
-//             headers: {
-//                 authorization: `Bearer ${token}`
-//             }
-//         } )
+        image.value = input.files[0];
 
-//         console.log(hotel)
+        let formData = new FormData()
 
-//         preview.value = hotel.cover_image
-        
-//     }
+        formData.append('cover_img', image.value)
+
+        try {
+            const {data} = await axios.patch( `/api/hotel/coverphoto/${currentHotel._id}`, formData, {
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            } )
+
+            preview.value = data.cover_image
+            toast.success('Successfully Updated!', {
+                position: 'top-right',
+                duration: 5000,
+                dismissible: true
+            })
+        }
+        catch (error) {
+            console.log(error)
+            toast.error('Something went wrong!', {
+                position: 'top-right',
+                duration: 5000,
+                dismissible: true
+            })
+        }    
+    }
     
-// }
+}
 
-// const onMultipleChange = async (event) => {
-//     var input = event.target;
-//     if (input.files) {
+const onMultipleChange = async (event) => {
+    var input = event.target;
+    if (input.files) {
 
-//         images.value = input.files;
+        images.value = input.files;
 
-//         console.log(images.value.length)
+        try {
+            for(let i = 0; i < images.value.length; i++){
+                let formData = new FormData()
+                formData.append('gallery_img', images.value[i])
 
-//         for(let i = 0; i < images.value.length; i++){
-//             let formData = new FormData()
-//             formData.append('gallery_img', images.value[i])
+                const {data} = await axios.patch( `/api/hotel/gallery/${currentHotel._id}`, formData, {
+                    headers: {
+                        'authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                } )
 
-//             const path = await $fetch( `${baseUrl}/api/hotel/gallery/${hotelId.value}`, {
-//                 method: 'PATCH',
-//                 body: formData,
-//                 headers: {
-//                     authorization: `Bearer ${token}`
-//                 }
-//             } )
+                previews.value.push(data)
+            }
 
-//             console.log(path)
-//             previews.value.push(path)
-//         }
+            toast.success('Successfully Updated!', {
+                position: 'top-right',
+                duration: 5000,
+                dismissible: true
+            })
+        }
+        catch (error) {
+            console.log(error)
+            toast.error('Something went wrong!', {
+                position: 'top-right',
+                duration: 5000,
+                dismissible: true
+            })
+        }
         
-//     }
+    }
     
-// }
+}
 
 const clear = () => {
     image.value = null
 }
 
-const clearGallery = (imglink) => {
+const clearGallery = async (imglink) => {
     previews.value = previews.value.filter(path => {
         return path !== imglink
     })
+
+    try {
+        const {data} = await axios.patch(`/api/hotel/update-hotel/${currentHotel._id}`,
+            {
+                gallery_images: previews.value
+            },
+            {
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+        })
+
+        await store.dispatch('getCurrentHotel', currentHotel._id)
+        toast.success('Successfully Deleted!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+    }
+    catch (error) {
+        toast.error('Something went wrong!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+        console.log(error)
+    }
+    
 }
 
+const toggleEditMode = () => {
+    editMode.value = !editMode.value
+}
+
+const handleUpdate = () => {
+    loading.value = true
+
+    if(!image.value) {
+        return toast.error('Please add an image!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+    }
+
+    if(images.value.length == 0) {
+        return toast.error('Please add an image!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+    }
+
+    setTimeout(() => {
+        editMode.value = false
+        loading.value = false
+    }, 3000)
+}
 
 </script>
 
@@ -87,6 +189,9 @@ const clearGallery = (imglink) => {
             current="Images"
             next="Policies"
             nextRoute="policies"
+            :editMode="editMode"
+            @onEdit="toggleEditMode"
+            @onSave="handleUpdate"
         />
 
         <section class="w-full flex flex-col gap-10">
@@ -95,7 +200,7 @@ const clearGallery = (imglink) => {
 
                 <div class="px-4 flex flex-col gap-6">
 
-                    <div class="w-full h-70vh border rounded-lg border-slate-500 border-dashed">
+                    <div class="w-full h-[70vh] border rounded-lg border-slate-500 border-dashed">
 
                         <div v-show="!image" class="w-full h-full py-24 flex flex-col items-center justify-between">
 
@@ -119,7 +224,7 @@ const clearGallery = (imglink) => {
                         <div v-show="image" class="relative w-full h-full bg-slate-300">
                             <img :src="preview" loading="lazy" class="w-full h-full object-contain" alt="">
 
-                            <button @click="clear" class="w-8 h-8 rounded-full bg-red-500 absolute top-2 right-2">
+                            <button v-if="editMode" @click="clear" class="w-8 h-8 rounded-full bg-red-500 absolute top-2 right-2">
                                 <font-awesome-icon icon="fa-solid fa-trash" class="text-white text-sm "/>
                             </button>
                         </div>
@@ -160,14 +265,14 @@ const clearGallery = (imglink) => {
                             <div v-for="(preview, index) in previews" :key="index" class="w-full aspect-square relative">
                                 <img :src="preview" loading="lazy" class="w-full h-full object-cover" alt="">
 
-                                <button @click="clearGallery(preview)" class="w-8 h-8 rounded-full bg-red-500 absolute top-2 right-2">
+                                <button v-if="editMode" @click="clearGallery(preview)" class="w-8 h-8 rounded-full bg-red-500 absolute top-2 right-2">
                                     <font-awesome-icon icon="fa-solid fa-trash" class="text-white text-sm "/>
                                 </button>
                             </div>
 
                             <div class="w-full aspect-square grid place-items-center">
 
-                                <label for="gallery-img" class="py-3 px-4 text-blue-500 text-sm font-semibold rounded-lg border border-blue-500 cursor-pointer">
+                                <label v-if="editMode" for="gallery-img" class="py-3 px-4 text-blue-500 text-sm font-semibold rounded-lg border border-blue-500 cursor-pointer">
                                     <font-awesome-icon icon="fa-solid fa-camera" class="text-blue-500 text-base "/>
                                     Add more
                                 </label>
@@ -184,6 +289,15 @@ const clearGallery = (imglink) => {
                 </div>
 
             </FormCard>
+
+            <button
+                v-if="editMode"
+                @click="handleUpdate"
+                class="w-full py-4 bg-blue-700 text-white font-semibold text-base rounded-lg hover:bg-blue-900"
+            >
+                <ButtonSpinner v-if="loading"/>
+                <span v-else>Save</span>
+            </button>
 
         </section>
     </div>

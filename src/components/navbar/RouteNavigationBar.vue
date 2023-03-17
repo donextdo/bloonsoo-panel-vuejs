@@ -1,6 +1,6 @@
 <script setup>
 
-const emits = defineEmits(['onEdit'])
+const emits = defineEmits(['onEdit', 'onSave'])
 
 const props = defineProps({
     previous: {
@@ -20,6 +20,10 @@ const props = defineProps({
     },
     nextRoute: {
         type: String
+    },
+    editMode: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -32,7 +36,7 @@ const props = defineProps({
         <div 
         class="w-full flex itmes-center justify-start">
             <router-link :to="{name: prevRoute}" 
-            v-if="previous"
+            v-if="previous && !editMode"
             class="text-gray-600 text-sm font-normal flex items-center gap-1">
                 <font-awesome-icon icon="fa-solid fa-arrow-left"/>
                 <span>
@@ -47,8 +51,17 @@ const props = defineProps({
             v-if="current"
             class="text-gray-800 text-lg font-bold flex items-center gap-3">
                 <span>{{ current }}</span>
-                <button>
+                <button v-if="!editMode" @click="() => emits('onEdit')">
                     <font-awesome-icon icon="fa-solid fa-pen-to-square" class="text-blue-600"/>
+                </button>
+
+                <button v-if="editMode" @click="() => emits('onEdit')">
+                    <font-awesome-icon icon="fa-solid fa-times" class="text-red-600 text-lg"/>
+                </button>
+
+                <button v-if="editMode" @click="() => emits('onSave')" 
+                    class="px-4 py-2 bg-blue-700 text-white font-semibold text-sm rounded-lg hover:bg-blue-900">
+                    Save
                 </button>
             </div>
         </div>
@@ -56,7 +69,7 @@ const props = defineProps({
         <div 
         class="w-full flex itmes-center justify-end">
             <router-link :to="{name: nextRoute}" 
-            v-if="next"
+            v-if="next && !editMode"
             class="text-gray-600 text-sm font-normal flex items-center gap-1">
                 <span>
                     {{ next }}

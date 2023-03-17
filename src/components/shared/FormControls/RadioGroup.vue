@@ -26,6 +26,10 @@
         name: {
             type: String,
             default: 'radioGroup'
+        },
+        checkedVal: {
+            type: String,
+            default: ''
         }
     })
 </script>
@@ -44,8 +48,10 @@
                 :id="option.data"
                 :name="name"
                 :value="option.data"
+                :checked="option.data === checkedVal"
                 @input="$emit('update:modelValue', $event.target.value)"
                 class="w-4 h-4 cursor-pointer"
+                v-bind="$attrs"
                 /> 
 
                 <label :for="option.data" class="text-gray-600 text-sm h-max w-max font-semibold"> {{ option.label }}</label>

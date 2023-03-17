@@ -1,10 +1,20 @@
 <script setup>
 
-import { ref } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import RouteNavigationBar from '../../../components/navbar/RouteNavigationBar.vue';
 import FormCard from '../../../components/shared/FormCard.vue';
 import DropDown from '../../../components/shared/FormControls/DropDown.vue';
 import RadioGroup from '../../../components/shared/FormControls/RadioGroup.vue';
+import ButtonSpinner from '../../../components/Spinner/ButtonSpinner.vue';
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
+import { useToast } from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+
+const store = useStore()
+const axios = inject('axios')
+const toast = useToast()
+const { currentHotel } = store.state
 
 const cancellationDuration = ref('1')
 const payTime = ref('Of the first night')
@@ -21,6 +31,78 @@ const accommodateChildrenError = ref(false);
 
 const pets = ref("yes");
 
+const editMode = ref(false)
+const loading = ref(false)
+
+const setDefaults = () => {
+    cancellationDuration.value = currentHotel?.policies.cancellation_duration.toString()
+    payTime.value = currentHotel?.policies.pay_time
+    checkInForm.value = currentHotel?.policies.check_in_form
+    checkInUntill.value = currentHotel?.policies.check_in_untill
+    checkOutForm.value = currentHotel?.policies.check_out_form
+    checkOutUntill.value = currentHotel?.policies.check_out_untill
+    accommodateChildren.value = currentHotel?.policies.accommodate_children ? 'yes' : 'no'
+    pets.value = currentHotel?.policies.pets ? 'yes' : 'no'
+}
+
+onMounted(() => {
+    if(currentHotel) setDefaults()
+})
+
+const toggleEditMode = () => {
+    editMode.value = !editMode.value
+}
+
+const handleUpdate = async () => {
+    loading.value = true
+
+    const dto = {
+
+        cancellation_duration: cancellationDuration.value,
+        pay_time: payTime.value,
+
+        preventAccidental_bookings: preventAccidentalBookings.value,
+
+        check_in_form: checkInForm.value,
+        check_in_untill: checkInUntill.value,
+        check_out_form: checkOutForm.value,
+        check_out_untill: checkOutUntill.value,
+
+        accommodate_children: accommodateChildren.value === "yes" ? true : false,
+        pets: pets.value === "yes" ? true : false
+
+    }
+
+    try {
+        const {data} = await axios.patch(`/api/hotel/update-hotel/${currentHotel._id}`,
+            {
+                policies: dto
+            },
+            {
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+        })
+        await store.dispatch('getCurrentHotel', currentHotel._id)
+        editMode.value = false
+        loading.value = false
+        toast.success('Successfully Updated!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+    }
+    catch (error) {
+        editMode.value = false
+        loading.value = false
+        toast.error('Something went wrong!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+        console.log(error)
+    }
+}
 
 </script>
 
@@ -33,6 +115,9 @@ const pets = ref("yes");
             current="Policies"
             next="Payments"
             nextRoute="payments"
+            :editMode="editMode"
+            @onEdit="toggleEditMode"
+            @onSave="handleUpdate"
         />
 
         <section class="w-full flex flex-col gap-10">
@@ -147,6 +232,7 @@ const pets = ref("yes");
                     name="children"
                     v-model="accommodateChildren"
                     :error="accommodateChildrenError"
+                    :checkedVal="accommodateChildren"
                     errorMessage="Please select an option"
                     />
 
@@ -159,6 +245,15 @@ const pets = ref("yes");
                     />
                 </div>
             </FormCard>
+
+            <button
+                v-if="editMode"
+                @click="handleUpdate"
+                class="w-full py-4 bg-blue-700 text-white font-semibold text-base rounded-lg hover:bg-blue-900"
+            >
+                <ButtonSpinner v-if="loading"/>
+                <span v-else>Save</span>
+            </button>
 
         </section>
     </div>

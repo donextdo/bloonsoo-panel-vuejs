@@ -4,7 +4,7 @@ import axios from 'axios'
 
 let development = process.env.NODE_ENV !== 'production'
 
-const baseUrl = development ? 'http://localhost:9000' :' http://api.marriextransfer.com'
+const baseUrl = development ? 'http://localhost:9000' :'https://api.bloonsoo.com'
 
 export default createStore({
   state: {

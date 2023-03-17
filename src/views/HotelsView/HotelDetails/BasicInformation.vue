@@ -2,17 +2,22 @@
 
 import RouteNavigationBar from '../../../components/navbar/RouteNavigationBar.vue';
 import MazPhoneNumberInput from 'maz-ui/components/MazPhoneNumberInput'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import '../../../assets/css/phoneNumberInput.css'
 import FormCard from '../../../components/shared/FormCard.vue';
 import TextInput from '../../../components/shared/FormControls/TextInput.vue';
 import DropDown from '../../../components/shared/FormControls/DropDown.vue';
 import RadioGroup from '../../../components/shared/FormControls/RadioGroup.vue';
 import TextArea from '../../../components/shared/FormControls/TextArea.vue';
+import ButtonSpinner from '../../../components/Spinner/ButtonSpinner.vue';
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+import { useToast } from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
 
 const store = useStore()
+const axios = inject('axios')
+const toast = useToast()
 const { currentHotel } = store.state
 
 const propertyName = ref('')
@@ -33,13 +38,17 @@ const phoneNumberAltRes = ref()
 const ownMultipleHotels = ref()
 const ownMultipleHotelsError = ref(false)
 
+const ownMultipleHotelChekedval = ref()
+
 const channelManager = ref()
 const channelManagerError = ref(false)
+
+const channelManagerChekedVal = ref()
 
 const streetAddress = ref()
 const streetAddressError = ref(false)
 
-const country = ref('Sri Lanka')
+const country = ref()
 const countryError = ref(false)
 
 const postalCode = ref('')
@@ -49,18 +58,101 @@ const about = ref('')
 const aboutError = ref(false)
 
 
+const editMode = ref(false)
+const loading = ref(false)
+
 const setDefaults = () => {
     propertyName.value = currentHotel?.property_name
     startRating.value = currentHotel?.star_rating
     contactName.value = currentHotel?.contact_name
-    phoneNumberRes.value = currentHotel?.ccontact_phone_number
+    phoneNumber.value = currentHotel?.contact_phone_number
+    phoneNumberAlt.value = currentHotel?.contact_phone_number_alternative || ''
+    ownMultipleHotels.value = currentHotel?.is_own_multiple_hotels ? 'yes' : 'no'
+    ownMultipleHotelChekedval.value = currentHotel?.is_own_multiple_hotels ? 'yes' : 'no'
+    channelManager.value = currentHotel?.use_channel_manager ? 'yes' : 'no'
+    channelManagerChekedVal.value = currentHotel?.use_channel_manager ? 'yes' : 'no'
+    streetAddress.value = currentHotel?.property_address.street_address
+    country.value = currentHotel?.property_address.country
+    postalCode.value = currentHotel?.property_address.postal_code
     about.value = currentHotel.about
 }
 
 onMounted(() => {
+    console.log(currentHotel)
     if(currentHotel) setDefaults()
     
 })
+
+const toggleEditMode = () => {
+    editMode.value = !editMode.value
+}
+
+
+const handleUpdate = async () => {
+    setTimeout(() => {
+        propertyNameError.value = false
+        contactNameError.value = false
+        phoneNumberError.value = false
+        streetAddressError.value = false
+        postalCodeError.value = false
+        aboutError.value = false
+    }, 10000)
+
+    if(!propertyName.value) return propertyNameError.value = true
+    if(!contactName.value) return contactNameError.value = true
+    if(!phoneNumber.value) return phoneNumberError.value = true
+    if(!streetAddress.value) return streetAddressError.value = true
+    if(!postalCode.value) return postalCodeError.value = true
+    if(!about.value.length > 1200) return aboutError.value = true
+
+    loading.value = true
+
+    const hotelDto = {
+        property_name: propertyName.value,
+        star_rating: startRating.value,
+        contact_name: contactName.value,
+        contact_phone_number: phoneNumber.value,
+        contact_phone_number_alternative: phoneNumberAlt.value || null,
+        is_own_multiple_hotels: ownMultipleHotels.value === 'yes' ? true : false,
+        use_channel_manager: channelManager.value === 'yes' ? true : false,
+        property_address: {
+            street_address: streetAddress.value,
+            country: country.value,
+            postal_code: postalCode.value
+        },
+        about: about.value
+    }
+    
+    try {
+        const {data} = await axios.patch(`/api/hotel/update-hotel/${currentHotel._id}`,
+            hotelDto,
+            {
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+        })
+        await store.dispatch('getCurrentHotel', currentHotel._id)
+        editMode.value = false
+        loading.value = false
+        toast.success('Successfully Updated!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+    }
+    catch (error) {
+        editMode.value = false
+        loading.value = false
+        toast.error('Something went wrong!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+        console.log(error)
+    }
+    
+}
+
 
 </script>
 
@@ -71,6 +163,9 @@ onMounted(() => {
             current="Basic information"
             next="Facilities and Amenities"
             nextRoute="facilities"
+            :editMode="editMode"
+            @onEdit="toggleEditMode"
+            @onSave="handleUpdate"
         />
 
         <section class="w-full flex flex-col gap-10">
@@ -79,9 +174,9 @@ onMounted(() => {
 
                 <div class="grid grid-cols-2 gap-x-8 gap-y-2 px-4">
 
-                    <TextInput label="Name of your Property" v-model="propertyName" :error="propertyNameError" errorMessage="Property name cannot be empty" />
+                    <TextInput label="Name of your Property" v-model="propertyName" :error="propertyNameError" errorMessage="Property name cannot be empty" :readonly="!editMode"/>
 
-                    <DropDown label="Star Rating" v-model="startRating" slot>
+                    <DropDown label="Star Rating" v-model="startRating" :readonly="!editMode" slot>
                     
                         <option value="N/A" 
                         class="text-sm font-semibold text-gray-500 appearance-none">
@@ -133,9 +228,13 @@ onMounted(() => {
 
                 <div class="grid grid-cols-2 gap-x-8 gap-y-6 px-4">
 
-                    <TextInput label="Contact name" v-model="contactName" :error="contactNameError" errorMessage="Contact name cannot be empty" />
+                    <TextInput label="Contact name" v-model="contactName" :error="contactNameError" errorMessage="Contact name cannot be empty" :readonly="!editMode" />
 
-                    <div class="flex flex-col gap-2 items-start col-start-1">
+                    <TextInput label="Phone Number" v-model="phoneNumber" :error="phoneNumberError" errorMessage="Please enter a mobile number" :readonly="!editMode" />
+
+                    <TextInput label="Alternative Phone Number" v-model="phoneNumberAlt" :readonly="!editMode"/>
+
+                    <!-- <div class="flex flex-col gap-2 items-start col-start-1">
 
                         <label :class="phoneNumberError ? 'text-red-600' : 'text-gray-600' " class="text-sm font-semibold">Phone Number</label>
 
@@ -169,7 +268,7 @@ onMounted(() => {
                             :success="phoneNumberAltRes?.isValid"
                         />
 
-                    </div>
+                    </div> -->
 
                     <RadioGroup 
                     title="Do you own multiple hotels, or are you a part of a property management company?"
@@ -177,7 +276,9 @@ onMounted(() => {
                     v-model="ownMultipleHotels" 
                     :options="[{data: 'yes', label: 'yes'}, {data: 'no', label: 'no'}]"
                     :error="ownMultipleHotelsError"
+                    :checkedVal="ownMultipleHotelChekedval"
                     name="group1"
+                    :readonly="!editMode"
                     errorMessage="Please select an option"
                     />
 
@@ -198,7 +299,9 @@ onMounted(() => {
                     v-model="channelManager" 
                     :options="[{data: 'yes', label: 'yes'}, {data: 'no', label: 'no'}]"
                     :error="channelManagerError"
+                    :checkedVal="channelManagerChekedVal"
                     name="group2"
+                    :readonly="!editMode"
                     errorMessage="Please select an option"/>
                 </div>
 
@@ -216,18 +319,21 @@ onMounted(() => {
                         <TextInput 
                         label="Street Address" 
                         v-model="streetAddress" :error="streetAddressError" errorMessage="Please enter street address" 
-                        class="col-start-1" />
+                        class="col-start-1" 
+                        :readonly="!editMode"/>
 
                         <DropDown 
                         label="Country/Region" 
                         v-model="country" :error="countryError" errorMessage="Please select a country" 
                         :options="['Sri Lanka', 'Australia', 'India']" 
-                        class="col-start-1" />
+                        class="col-start-1"
+                        :readonly="!editMode" />
 
                         <TextInput 
                         label="Post Code" 
                         v-model="postalCode" :error="postalCodeError" errorMessage="please enter post code" 
-                        class="col-start-1" />
+                        class="col-start-1"
+                        :readonly="!editMode" />
 
                         <div class="flex flex-col gap-2 items-start row-span-3 col-start-2 row-start-1">
 
@@ -253,11 +359,21 @@ onMounted(() => {
                     :maxChars="1200"
                     v-model="about"
                     :error="aboutError"
+                    :readonly="!editMode"
                     error-message="content too long"   
                 />
                 </div>
 
             </FormCard>
+
+            <button
+                v-if="editMode"
+                @click="handleUpdate"
+                class="w-full py-4 bg-blue-700 text-white font-semibold text-base rounded-lg hover:bg-blue-900"
+            >
+                <ButtonSpinner v-if="loading"/>
+                <span v-else>Save</span>
+            </button>
 
         </section>
     </div>

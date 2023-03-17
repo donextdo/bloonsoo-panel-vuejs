@@ -60,6 +60,7 @@
             class="w-full px-6 py-2 border border-slate-400 text-gray-600 text-sm font-semibold focus:outline-none"
             :rows="rows"
             @keyup="countRemain()"
+            v-bind="$attrs"
             />
 
             <p :class="contentError ? 'text-red-600' : 'text-gray-500'" class="absolute bottom-4 right-2 text-sm font-bold">

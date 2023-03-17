@@ -1,17 +1,78 @@
 <script setup>
 
-import { ref } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import RouteNavigationBar from '../../../components/navbar/RouteNavigationBar.vue';
 import FormCard from '../../../components/shared/FormCard.vue';
 import TextInput from '../../../components/shared/FormControls/TextInput.vue';
 import DropDown from '../../../components/shared/FormControls/DropDown.vue';
 import RadioGroup from '../../../components/shared/FormControls/RadioGroup.vue';
 import TextArea from '../../../components/shared/FormControls/TextArea.vue';
+import ButtonSpinner from '../../../components/Spinner/ButtonSpinner.vue';
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
+import { useToast } from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+
+const store = useStore()
+const axios = inject('axios')
+const toast = useToast()
+const { currentHotel } = store.state
 
 const creditCardOption = ref();
 const creditCardOptionError = ref(false);
 
 const commissionPayments = ref("John");
+
+const editMode = ref(false)
+const loading = ref(false)
+
+const setDefaults = () => {
+    creditCardOption.value = currentHotel?.credit_card_options ? 'yes' : 'no'
+}
+
+onMounted(() => {
+    if(currentHotel) setDefaults()
+})
+
+const toggleEditMode = () => {
+    editMode.value = !editMode.value
+}
+
+const handleUpdate = async () => {
+    loading.value = true
+
+    const dto = {
+        credit_card_options: creditCardOption.value === "yes" ? true : false
+    }
+
+    try {
+        const {data} = await axios.patch(`/api/hotel/update-hotel/${currentHotel._id}`,
+            dto,
+            {
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+        })
+        await store.dispatch('getCurrentHotel', currentHotel._id)
+        editMode.value = false
+        loading.value = false
+        toast.success('Successfully Updated!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+    }
+    catch (error) {
+        editMode.value = false
+        loading.value = false
+        toast.error('Something went wrong!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+        console.log(error)
+    }
+}
 
 </script>
 
@@ -23,6 +84,9 @@ const commissionPayments = ref("John");
             previous="Policies"
             prevRoute="policies"
             current="Payments"
+            :editMode="editMode"
+            @onEdit="toggleEditMode"
+            @onSave="handleUpdate"
         />
 
         <section class="w-full flex flex-col gap-10">
@@ -36,6 +100,7 @@ const commissionPayments = ref("John");
                         { data: 'no', label: 'no' },
                     ]"
                     name="group3"
+                    :checkedVal="creditCardOption"
                     errorMessage="Please select an option"
                     v-model="creditCardOption"
                     :error="creditCardOptionError"
@@ -203,6 +268,15 @@ const commissionPayments = ref("John");
                     </p>
                 </div>
             </FormCard>
+
+            <button
+                v-if="editMode"
+                @click="handleUpdate"
+                class="w-full py-4 bg-blue-700 text-white font-semibold text-base rounded-lg hover:bg-blue-900"
+            >
+                <ButtonSpinner v-if="loading"/>
+                <span v-else>Save</span>
+            </button>
 
         </section>
     </div>

@@ -1,12 +1,22 @@
 <script setup>
 
 import RouteNavigationBar from '../../../components/navbar/RouteNavigationBar.vue';
-import { ref } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import FormCard from '../../../components/shared/FormCard.vue';
 import TextInput from '../../../components/shared/FormControls/TextInput.vue';
 import DropDown from '../../../components/shared/FormControls/DropDown.vue';
 import RadioGroup from '../../../components/shared/FormControls/RadioGroup.vue';
 import CheckboxGroup from '../../../components/shared/FormControls/CheckboxGroup.vue';
+import ButtonSpinner from '../../../components/Spinner/ButtonSpinner.vue';
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
+import { useToast } from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+
+const store = useStore()
+const axios = inject('axios')
+const toast = useToast()
+const { currentHotel } = store.state
 
 const facilitiesData = [
     {data: 'Non-smoking rooms', label: 'Non-smoking rooms'}, 
@@ -81,6 +91,7 @@ const parkingPriceError = ref(false)
 
 const breakpastOption = ref()
 const breakpastOptionError = ref(false)
+const breakpastOptionCheckedVal = ref()
 
 const languages = ref([])
 
@@ -95,6 +106,87 @@ const amenities = ref([])
 const amenitiesError = ref(false)
 
 
+const editMode = ref(false)
+const loading = ref(false)
+
+const setDefaults = () => {
+    parkingType.value = currentHotel?.parking_details.parking_type
+    parkingType2.value = currentHotel?.parking_details.parking_type_2
+    parkingType3.value = currentHotel?.parking_details.parking_type_3
+    reservation.value = currentHotel?.parking_details.reservation ? 'yes' : 'no'
+    priceUnit.value = currentHotel?.parking_details.parking_price.split(' ')[0]
+    parkingPrice.value = parseInt(currentHotel?.parking_details.parking_price.split(' ')[1])
+    breakpastOption.value = currentHotel?.breakfast ? 'yes' : 'no'
+    languages.value = currentHotel?.languages
+    facilities.value = currentHotel?.facilities
+    extraBedOpt.value = currentHotel?.extra_beds ? 'yes' : 'no'
+    noOfBeds.value = currentHotel?.extra_beds_options?.no_of_beds
+    accommodateGuests.value = currentHotel?.extra_beds_options?.accommodate_guests
+    amenities.value = currentHotel?.amenities
+}
+
+onMounted(() => {
+    if(currentHotel) setDefaults()
+})
+
+const toggleEditMode = () => {
+    editMode.value = !editMode.value
+}
+
+const handleUpdate = async () => {
+    loading.value = true
+
+    const dto = {
+        parking: parkingType.value == 'no' ? false : true,
+        parking_details: parkingType.value == 'no' ? null 
+        : {
+            parking_type: parkingType.value,
+            parking_type_2: parkingType2.value,
+            parking_type_3: parkingType3.value,
+            reservation: reservation.value == 'yes' ? true : false,
+            parking_price: `${priceUnit.value} ${parkingPrice.value ? parkingPrice.value : 0.00}`
+        },
+        breakfast: breakpastOption.value == 'yes' ? true : false,
+        languages: languages.value,
+        facilities: facilities.value,
+        extra_beds: extraBedOpt.value == 'yes' ? true : false,
+        extra_beds_options: extraBedOpt.value == 'no' || !extraBedOpt.value ? null 
+        : {
+            no_of_beds: noOfBeds.value,
+            accommodate_guests: accommodateGuests.value
+        },
+        amenities: amenities.value
+    }
+
+    try {
+        const {data} = await axios.patch(`/api/hotel/update-hotel/${currentHotel._id}`,
+            dto,
+            {
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+        })
+        await store.dispatch('getCurrentHotel', currentHotel._id)
+        editMode.value = false
+        loading.value = false
+        toast.success('Successfully Updated!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+    }
+    catch (error) {
+        editMode.value = false
+        loading.value = false
+        toast.error('Something went wrong!', {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true
+        })
+        console.log(error)
+    }
+}
+
 </script>
 
 
@@ -106,6 +198,9 @@ const amenitiesError = ref(false)
             current="Facilities and Amenities"
             next="Images"
             nextRoute="images"
+            :editMode="editMode"
+            @onEdit="toggleEditMode"
+            @onSave="handleUpdate"
         />
 
         <section class="w-full flex flex-col gap-10">
@@ -174,6 +269,7 @@ const amenitiesError = ref(false)
                         name="breakfastOpt"
                         :error="breakpastOptionError"
                         error-message="Please select an option"
+                        :checkedVal="breakpastOption"
                         :options="[{data: 'yes', label: 'yes'}, {data: 'no', label: 'no'}]
                         "/>
 
@@ -228,6 +324,7 @@ const amenitiesError = ref(false)
                     <RadioGroup 
                     title="Do you provide extra beds ?"
                     v-model="extraBedOpt" 
+                    :checkedVal="extraBedOpt"
                     :options="[{data: 'yes', label: 'yes'}, {data: 'no', label: 'no'}]
                     "/>
 
@@ -303,6 +400,15 @@ const amenitiesError = ref(false)
                 </div>
 
             </FormCard>
+
+            <button
+                v-if="editMode"
+                @click="handleUpdate"
+                class="w-full py-4 bg-blue-700 text-white font-semibold text-base rounded-lg hover:bg-blue-900"
+            >
+                <ButtonSpinner v-if="loading"/>
+                <span v-else>Save</span>
+            </button>
 
         </section>
     </div>
