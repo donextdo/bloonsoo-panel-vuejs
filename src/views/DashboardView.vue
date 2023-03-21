@@ -158,12 +158,12 @@ async function getActiveUsers() {
         </h3>
 
         <div class="w-full grid grid-cols-4 gap-6">
-            <DashboardCard icon="fa-solid fa-hotel" color="cyan-600" title="Active Hotels" value="50"/>
-            <DashboardCard icon="fa-solid fa-bell-concierge" color="orange-300" title="Total Bookings" :value="totalBookings"/>
+            <DashboardCard icon="fa-solid fa-hotel" color="cyan-600" title="Active Hotels" class="bg-cyan-600" value="50"/>
+            <DashboardCard icon="fa-solid fa-bell-concierge" color="orange-300" class="bg-orange-300" title="Total Bookings" :value="totalBookings"/>
             <DashboardCard 
             v-if="user.role == 'admin'"
-            icon="fa-solid fa-dollar-sign" color="fuchsia-500" title="Total Income" :value="totalCommission"/>
-            <DashboardCard icon="fa-solid fa-users" color="emerald-500" title="Active Users" :value="activeUsers"/>
+            icon="fa-solid fa-dollar-sign" color="fuchsia-500" class="bg-fuchsia-500" title="Total Income" :value="totalCommission"/>
+            <DashboardCard icon="fa-solid fa-users" color="emerald-500" class="bg-emerald-500" title="Active Users" :value="activeUsers"/>
         </div>
 
         <div class="w-full grid grid-cols-2 gap-6">
