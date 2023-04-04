@@ -45,7 +45,7 @@ const getStatusColor = (status) => {
 
         <Table>
 
-            <template #thead>
+            <template #thead >
                 <TableHead>
                     Property Name
                 </TableHead>
@@ -121,6 +121,12 @@ const getStatusColor = (status) => {
                             View
                         </router-link>
 
+                        <router-link 
+                        :to="{name: '', params: {}}"
+                        class="px-4 py-1 text-xs font-semibold bg-blue-600 text-white rounded-md">
+                            Rooms
+                        </router-link>
+                        
                         <button 
                         v-if="hotel.status === 'pending'"
                         class="px-4 py-1 text-xs font-semibold bg-green-600 text-white rounded-md">
@@ -142,6 +148,9 @@ const getStatusColor = (status) => {
                         <button class="px-4 py-1 text-xs font-semibold bg-red-800 text-white rounded-md">
                             Delete
                         </button>
+
+
+
                     </div>
                 </TableCell>
 

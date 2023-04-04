@@ -94,6 +94,15 @@ const accommodateGuests = ref([])
 const amenities = ref([])
 const amenitiesError = ref(false)
 
+const editMode = ref(false) 
+
+const setDefaults = () => {
+    parkingType.value = currentHotel?.parking_details.parking_type
+    
+}
+
+
+
 
 </script>
 
@@ -117,23 +126,28 @@ const amenitiesError = ref(false)
                     <DropDown 
                         label="Is parking available to the guests?" 
                         v-model="parkingType" 
-                        :options="[{value: 'paid', label: 'Yes, paid'}, {value: 'free', label: 'Yes, free'}, {value: 'no', label: 'No'}]" />
+                        :options="[{value: 'paid', label: 'Yes, paid'}, {value: 'free', label: 'Yes, free'}, {value: 'no', label: 'No'}]" 
+                        />
 
                     <DropDown 
                         v-if="(parkingType == 'paid' || parkingType == 'free')"
                         v-model="parkingType2" 
-                        :options="['Public', 'Private']" />
+                        :options="['Public', 'Private']" 
+                        />
 
                     <DropDown 
                         v-if="(parkingType == 'paid' || parkingType == 'free')"
                         v-model="parkingType3"
-                        :options="['On site', 'Off site']" />
+                        :options="['On site', 'Off site']" 
+                        />
 
                     <DropDown 
                         v-if="(parkingType == 'paid' || parkingType == 'free')"
                         label="Do guests need to reserve a parking space ?" 
                         v-model="reservation" 
-                        :options="[{value: 'no', label: 'No reservation needed'}, {value: 'yes', label: 'Yes, reservation needed'}]" />
+                        :options="[{value: 'no', label: 'No reservation needed'}, {value: 'yes', label: 'Yes, reservation needed'}]" 
+                        :readonly="!editMode"
+                        />
 
                     <div 
                     v-if="parkingType == 'paid'"
@@ -151,7 +165,7 @@ const amenitiesError = ref(false)
 
                             <TextInput 
                             v-model="parkingPrice" 
-                            type="number" class="col-span-2" />
+                            type="number" class="col-span-2" :readonly="!editMode" />
 
                         </div>
 

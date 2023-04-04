@@ -39,6 +39,7 @@ onMounted( async () => {
                 <TableHead>Email</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Arrival</TableHead>
+                <TableHead empty>Actions</TableHead>
                 </template>
 
                 <template #tbody>
@@ -76,6 +77,45 @@ onMounted( async () => {
                     <TableCell>
                         {{ book.arrival_time }}
                     </TableCell>
+
+                    <TableCell>
+                    <div class="w-full flex items-center gap-3">
+                        <router-link 
+                        :to="{name: '', params: {}}"
+                        class="px-4 py-1 text-xs font-semibold bg-gray-800 text-white rounded-md">
+                            View
+                        </router-link>
+
+                        <router-link 
+                        :to="{name: '', params: {}}"
+                        class="px-4 py-1 text-xs font-semibold bg-blue-600 text-white rounded-md">
+                            Rooms
+                        </router-link>
+                        
+                        <button 
+                        v-if="hotel.status === 'pending'"
+                        class="px-4 py-1 text-xs font-semibold bg-green-600 text-white rounded-md">
+                            Approve
+                        </button>
+
+                        <button
+                        class="px-4 py-1 text-xs font-semibold bg-blue-800 text-white rounded-md">
+                            Publish
+                        </button>
+
+                        <button 
+                        class="px-4 py-1 text-xs font-semibold bg-red-500 text-white rounded-md">
+                            Unpublish
+                        </button>
+
+                        <button class="px-4 py-1 text-xs font-semibold bg-red-800 text-white rounded-md">
+                            Delete
+                        </button>
+
+
+
+                    </div>
+                </TableCell>
 
                 </TableRow>
 

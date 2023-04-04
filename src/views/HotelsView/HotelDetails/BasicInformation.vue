@@ -48,17 +48,24 @@ const postalCodeError = ref(false)
 const about = ref('')
 const aboutError = ref(false)
 
+const editMode = ref(false) 
+
 
 const setDefaults = () => {
     propertyName.value = currentHotel?.property_name
     startRating.value = currentHotel?.star_rating
     contactName.value = currentHotel?.contact_name
-    phoneNumberRes.value = currentHotel?.ccontact_phone_number
+    phoneNumber.value = currentHotel?.contact_phone_number
     about.value = currentHotel.about
+    country.value = currentHotel?.property_address.country
+    streetAddress.value = currentHotel?.property_address.street_address
+    postalCode.value = currentHotel?.property_address.postal_code
+    
 }
 
 onMounted(() => {
     if(currentHotel) setDefaults()
+    console.log(currentHotel)
     
 })
 
@@ -79,12 +86,12 @@ onMounted(() => {
 
                 <div class="grid grid-cols-2 gap-x-8 gap-y-2 px-4">
 
-                    <TextInput label="Name of your Property" v-model="propertyName" :error="propertyNameError" errorMessage="Property name cannot be empty" />
+                    <TextInput label="Name of your Property" v-model="propertyName" :error="propertyNameError" errorMessage="Property name cannot be empty" :readonly="!editMode" />
 
-                    <DropDown label="Star Rating" v-model="startRating" slot>
+                    <DropDown label="Star Rating" v-model="startRating" slot :readonly="!editMode">
                     
                         <option value="N/A" 
-                        class="text-sm font-semibold text-gray-500 appearance-none">
+                        class="text-sm font-semibold text-gray-500 appearance-none" >
                             N/A
                         </option>
 
@@ -133,11 +140,11 @@ onMounted(() => {
 
                 <div class="grid grid-cols-2 gap-x-8 gap-y-6 px-4">
 
-                    <TextInput label="Contact name" v-model="contactName" :error="contactNameError" errorMessage="Contact name cannot be empty" />
+                    <TextInput label="Contact name" v-model="contactName" :error="contactNameError" errorMessage="Contact name cannot be empty" :readonly="!editMode" />
 
-                    <div class="flex flex-col gap-2 items-start col-start-1">
+                    <div class="flex flex-col gap-2 col-start-1">
 
-                        <label :class="phoneNumberError ? 'text-red-600' : 'text-gray-600' " class="text-sm font-semibold">Phone Number</label>
+                        <!-- <label :class="phoneNumberError ? 'text-red-600' : 'text-gray-600' " class="text-sm font-semibold">Phone Number</label>
 
 
                         <MazPhoneNumberInput
@@ -151,13 +158,17 @@ onMounted(() => {
 
                         <small v-if="phoneNumberError" class="text-xs text-red-600">
                             Please enter a mobile number
-                        </small>
+                        </small> -->
+
+                        <TextInput label="Phone Number" v-model="phoneNumber" :error="phoneNumberError" errorMessage="Phone Number cannot be empty" :readonly="!editMode"/>
 
                     </div>
 
-                    <div class="flex flex-col gap-2 items-start col-start-2">
+                    <div class="flex flex-col gap-2  col-start-2">
 
-                        <label class="text-gray-600 text-sm font-semibold">Alternative Phone Number</label>
+                        <TextInput label="Alternative Phone Number" v-model="phoneNumber" :error="phoneNumberError" errorMessage="Phone Number cannot be empty" :readonly="!editMode"/>
+                        
+                        <!-- <label class="text-gray-600 text-sm font-semibold">Alternative Phone Number</label>
 
 
                         <MazPhoneNumberInput
@@ -167,7 +178,7 @@ onMounted(() => {
                             no-example size="sm"
                             @update="phoneNumberAltRes = $event"
                             :success="phoneNumberAltRes?.isValid"
-                        />
+                        /> -->
 
                     </div>
 
@@ -216,7 +227,7 @@ onMounted(() => {
                         <TextInput 
                         label="Street Address" 
                         v-model="streetAddress" :error="streetAddressError" errorMessage="Please enter street address" 
-                        class="col-start-1" />
+                        class="col-start-1" :readonly="!editMode"/>
 
                         <DropDown 
                         label="Country/Region" 
@@ -227,7 +238,7 @@ onMounted(() => {
                         <TextInput 
                         label="Post Code" 
                         v-model="postalCode" :error="postalCodeError" errorMessage="please enter post code" 
-                        class="col-start-1" />
+                        class="col-start-1" :readonly="!editMode"/>
 
                         <div class="flex flex-col gap-2 items-start row-span-3 col-start-2 row-start-1">
 
@@ -254,6 +265,7 @@ onMounted(() => {
                     v-model="about"
                     :error="aboutError"
                     error-message="content too long"   
+                    :readonly="!editMode"
                 />
                 </div>
 
