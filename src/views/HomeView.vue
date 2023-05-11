@@ -29,11 +29,11 @@ const sidebarItems = ref( user.role == 'admin' ? [
     icon: 'fa-solid fa-bookmark',
     route: 'bookings'
   },
-  // {
-  //   title: 'Users',
-  //   icon: 'fa-solid fa-users',
-  //   route: 'dashboard'
-  // },
+  {
+    title: 'Users',
+    icon: 'fa-solid fa-users',
+    route: 'users'
+  },
   {
     title: 'Commission',
     icon: 'fa-solid fa-coins',

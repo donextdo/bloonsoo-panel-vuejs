@@ -13,7 +13,7 @@ library.add( fas )
 let development = process.env.NODE_ENV !== 'production'
 
 const axiosInstance = axios.create({
-    baseURL: development ? 'http://localhost:9000' : 'http://api.bloonsoo.com'
+    baseURL: development ? 'http://localhost:9000' : 'https://api.bloonsoo.com'
     // baseURL: development ? 'https://api.bloonsoo.com' : 'https://api.bloonsoo.com'
 })
 

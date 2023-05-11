@@ -95,7 +95,7 @@ async function getTotalCommission() {
                 'authorization': `Bearer ${localStorage.getItem('token')}`
             }
         })
-        totalCommission.value = data[0].total
+        totalCommission.value = data[0]?.total || 0
     }
     catch(error) {
         console.log(error)

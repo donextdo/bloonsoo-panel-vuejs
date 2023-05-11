@@ -6,6 +6,7 @@ import DashboardView from '../views/DashboardView.vue'
 import BookingView from '../views/BookingView.vue'
 import CommissionView from '../views/CommissionView/CommissionView.vue'
 import hotelRoutes from '../views/HotelsView'
+import usersRoutes from '../views/UsersView'
 import store from '../store'
 
 const routes = [
@@ -28,6 +29,7 @@ const routes = [
         component: DashboardView
       },
       ...hotelRoutes,
+      ...usersRoutes,
       {
         path: '/bookings',
         name: 'bookings',
