@@ -158,11 +158,21 @@ const dateConvert = (dateStr) => {
 
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-medium">
-                        Commission
+                        Commission for bloonsoo
                     </h3>
 
                     <h3 class="text-lg font-medium">
-                        USD {{ bookingObj.commission }}
+                        USD {{ (bookingObj.commission.toFixed(2)) }}
+                    </h3>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium">
+                        Hotel Payment
+                    </h3>
+
+                    <h3 class="text-lg font-medium">
+                        USD {{ ((bookingObj.total)-(bookingObj.commission.toFixed(2))).toFixed(2) }}
                     </h3>
                 </div>
 

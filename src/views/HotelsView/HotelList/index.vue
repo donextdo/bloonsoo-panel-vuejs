@@ -16,10 +16,13 @@ const { user } = store.state
 const hotels = ref([])
 const loading = ref(false)  
 const showAddHotelAdmin = ref(false)
+const rate = ref();
+
 
 onMounted( async () => {
 
     await fetchHotels()
+    await  getCommissionRate()
     
 })
 
@@ -35,6 +38,7 @@ async function fetchHotels() {
                 'authorization': `Bearer ${localStorage.getItem('token')}`
             }
         })
+        console.log(data)
         hotels.value = data
         loading.value = false
     } catch (error) {
@@ -59,7 +63,43 @@ const handleHotelStatus = async (id, type) => {
     catch (error) {
         console.log(error)
     }
-}   
+} 
+
+const handleHotelStatusInactive = async (id, type) => {
+    try {
+
+        const {data} = await axios.patch(`/api/hotel/${type}/${id}`, {}, {
+            headers: {
+                'authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+
+        console.log(data)
+        await fetchHotels()
+
+    }
+    catch (error) {
+        console.log(error)
+    }
+} 
+
+const handleHotelStatusActive = async (id, type) => {
+    try {
+
+        const {data} = await axios.patch(`/api/hotel/${type}/${id}`, {}, {
+            headers: {
+                'authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+
+        console.log(data)
+        await fetchHotels()
+
+    }
+    catch (error) {
+        console.log(error)
+    }
+} 
  
 
 
@@ -72,6 +112,20 @@ const getStatusColor = (status) => {
     }
     else {
         return 'bg-red-500'
+    }
+}
+
+async function getCommissionRate() {
+    try {
+        const res = await axios.get(`/api/commission/rate`, {
+            headers: {
+                authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+
+        rate.value = res.data.rate;
+    } catch (error) {
+        console.log(error);
     }
 }
 
@@ -119,6 +173,10 @@ const toggleAddHotelAdmin = () => {
                 </TableHead>
 
                 <TableHead empty>
+                    Hotel Commission
+                </TableHead>
+
+                <TableHead empty>
                     Status
                 </TableHead>
 
@@ -155,6 +213,10 @@ const toggleAddHotelAdmin = () => {
 
                 <TableCell>
                     {{ hotel.user?.username }}
+                </TableCell>
+
+                <TableCell>
+                    {{ hotel.special_commission ?  hotel.special_commission : rate}}
                 </TableCell>
 
                 <TableCell>
@@ -212,6 +274,20 @@ const toggleAddHotelAdmin = () => {
                         class="px-4 py-1 text-xs font-semibold bg-red-800 text-white rounded-md">
                             Delete
                         </button>
+
+                        <button 
+                        @click="handleHotelStatusInactive(hotel._id, 'inactive')"
+                        v-if="hotel.status === 'active' && user.role === 'admin'"
+                        class="px-4 py-1 text-xs font-semibold bg-blue-800 text-white rounded-md">
+                            Inactive
+                        </button>
+
+                        <!-- <button 
+                        @click="handleHotelStatusActive(hotel._id, 'active')"
+                        v-if="hotel.status === 'inactive' && user.role === 'admin'"
+                        class="px-4 py-1 text-xs font-semibold bg-blue-800 text-white rounded-md">
+                            Active
+                        </button> -->
                     </div>
                 </TableCell>
 

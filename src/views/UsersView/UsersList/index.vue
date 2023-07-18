@@ -29,7 +29,7 @@ onMounted( async () => {
 
 async function fetchUsers() {
     try {
-        loading.value = true
+        // loading.value = true
 
         const {data} = await axios.get('api/user/get-all-users', {
             headers: {
