@@ -104,6 +104,7 @@ const getStatusText = (status) => {
                 <TableHead>Total</TableHead>
                 <TableHead>Rate</TableHead>
                 <TableHead>Commission</TableHead>
+                <TableHead>Hotel Payment</TableHead>
                 <TableHead>Payment Method</TableHead>
                 <TableHead>Status</TableHead>
                 <!-- <TableHead>Arrival</TableHead> -->
@@ -152,7 +153,11 @@ const getStatusText = (status) => {
                     </TableCell>
 
                     <TableCell>
-                        USD {{ book.commission }}
+                        USD {{ (book.commission).toFixed(2) }}
+                    </TableCell>
+                    
+                    <TableCell>
+                        USD {{ ((book.total)-(book.commission).toFixed(2)).toFixed(2) }}
                     </TableCell>
 
                     <TableCell>

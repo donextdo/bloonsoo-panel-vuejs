@@ -134,16 +134,16 @@ async function getTotalBookings() {
 
 async function getActiveUsers() {
     try {
-        const {data} = await axios.get('/api/user/active-users', {
+        const {data} = await axios.get('/api/user/active-users/count', {
             headers: {
                 'authorization': `Bearer ${localStorage.getItem('token')}`
             }
         })
-        
+        console.log("all",data)
         activeUsers.value = data
     }
     catch(error) {
-        console.log(error)
+        console.log({error})
     }
 }
 
@@ -158,7 +158,7 @@ async function getActiveUsers() {
         </h3>
 
         <div class="w-full grid grid-cols-4 gap-6">
-            <DashboardCard icon="fa-solid fa-hotel" color="cyan-600" title="Active Hotels" class="bg-cyan-600" value="50"/>
+            <DashboardCard icon="fa-solid fa-hotel" color="cyan-600" title="Active Hotels" class="bg-cyan-600" :value="activeHotelCount"/>
             <DashboardCard icon="fa-solid fa-bell-concierge" color="orange-300" class="bg-orange-300" title="Total Bookings" :value="totalBookings"/>
             <DashboardCard 
             v-if="user.role == 'admin'"
