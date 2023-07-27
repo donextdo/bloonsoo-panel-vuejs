@@ -226,6 +226,7 @@ const dateConvert = (dateStr) => {
                 </h3>
                 <input type="number" v-model="specialRate"
                     class="px-6 py-2 border border-slate-400 text-gray-600 text-sm font-semibold focus:outline-none" />
+                
             </div>
             <div class="flex gap-8">
                 <select id="dropdown"

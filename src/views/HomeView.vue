@@ -1,6 +1,6 @@
 <script setup>
 
-import { ref } from 'vue'
+import { ref, inject, onMounted } from "vue";
 
 import Sidebar from "../components/sidebar/Sidebar.vue";
 import Li from "../components/sidebar/Li.vue";
@@ -8,10 +8,11 @@ import Navbar from "../components/navbar/Navbar.vue"
 import Content from "../components/shared/Content.vue"
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router';
-
+const axios = inject("axios");
 const store = useStore()
 const { user } = store.state
 const router = useRouter()
+const addRadius = ref("");
 
 const sidebarItems = ref( user.role == 'admin' ? [
   {
@@ -65,7 +66,20 @@ const logout = () => {
   router.push({name: 'login'})
 }
 
-
+const saveToDatabase = () => {
+  const radius = addRadius.value
+console.log("radius : ", radius)
+  // Make a POST request to the backend API to save the radius value in the database
+  axios.post(`/api/radius`, { radius: radius })
+    .then(response => {
+      console.log('Data saved successfully!', response.data);
+      // Optionally, you can display a success message or perform other actions
+    })
+    .catch(error => {
+      console.error('Error saving data:', error);
+      // Handle error cases here
+    });
+}
 </script>
 
 
@@ -105,7 +119,14 @@ const logout = () => {
           {{ user.role == 'admin' ? 'ADMIN' : 'HOTEL ADMIN' }}
         </h4>
 
-
+   <!-- radius -->
+   <h3 class="text-lg font-semibold text-gray-800">
+                    Radius:
+                </h3>
+                <input type="number" v-model="addRadius"
+                    class="px-6 py-2 border border-slate-400 text-gray-600 text-sm font-semibold focus:outline-none" />
+                    <button @click="saveToDatabase" clas="bg-slate-800 text-white text-sm font-semibold rounded-md" >Save to Database</button>
+        <!-- radius -->
         <button 
         @click="logout"
         class="py-2 px-6 bg-slate-800 text-white text-sm font-semibold rounded-md">

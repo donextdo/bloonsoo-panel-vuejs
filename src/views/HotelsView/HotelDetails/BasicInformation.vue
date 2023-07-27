@@ -13,6 +13,14 @@ import { useStore } from "vuex";
 import { useRoute } from "vue-router";
 import { useToast } from "vue-toast-notification";
 import "vue-toast-notification/dist/theme-sugar.css";
+import { GmapMap, GmapMarker } from "vue2-google-maps";
+import Places from "vue-places";
+import {
+    ref,
+    onMounted,
+    inject,
+    watch
+} from "vue";
 
 const store = useStore();
 const axios = inject("axios");
@@ -182,6 +190,44 @@ const handleUpdate = async () => {
         console.log(error);
     }
 };
+
+//map
+
+
+// Initialize the data properties
+const showMap = ref(false);
+const mapCenter = ref({
+    lat: 0,
+    lng: 0
+});
+const mapZoom = ref(15);
+const markerPosition = ref(null);
+
+// Watch the streetAddress and update the map accordingly
+watch(streetAddress, async (newAddress) => {
+    if (newAddress) {
+        showMap.value = true;
+
+        // Use Google Maps Geocoding API to get the latLng from the streetAddress
+        // Make sure you have a Google Maps API key set up and properly authorized
+        // Here, you need to replace 'YOUR_GOOGLE_MAPS_API_KEY' with your actual API key
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({
+            address: newAddress
+        }, (results, status) => {
+            if (status === google.maps.GeocoderStatus.OK) {
+                mapCenter.value = {
+                    lat: results[0].geometry.location.lat(),
+                    lng: results[0].geometry.location.lng()
+                };
+                markerPosition.value = mapCenter.value;
+            }
+        });
+    } else {
+        showMap.value = false;
+    }
+});
+
 </script>
 
 <template>
@@ -312,8 +358,8 @@ const handleUpdate = async () => {
                     <RadioGroup v-model="channelManager" :options="[
                         { data: 'yes', label: 'yes' },
                         { data: 'no', label: 'no' },
-                    ]" :error="channelManagerError" :checkedVal="channelManagerChekedVal" name="group2" :readonly="!editMode"
-                        errorMessage="Please select an option" />
+                    ]" :error="channelManagerError" :checkedVal="channelManagerChekedVal" name="group2"
+                        :readonly="!editMode" errorMessage="Please select an option" />
                 </div>
             </FormCard>
 
@@ -326,19 +372,9 @@ const handleUpdate = async () => {
                     </p>
 
                     <div class="w-full grid grid-cols-2 gap-6">
-                        <TextInput 
-                        label="Street Address" 
-                        v-model="streetAddress" :error="streetAddressError" errorMessage="Please enter street address" 
-                        class="col-start-1" 
-                        :readonly="!editMode"/>
-                        <!-- <ul v-if="predictions.length > 0 && !hide"
-                            class="top-full left-0 w-full bg-white z-10 border border-gray-300 rounded-md shadow-lg">
-                            <li v-for="prediction in predictions" :key="prediction.place_id"
-                                class="px-4 py-2 hover:bg-gray-100 cursor-pointer w-full text-left"
-                                @click="handlePredictionClick(prediction.place_id)">
-                                {{ prediction.description }}
-                            </li>
-                        </ul> -->
+                        <TextInput label="Street Address" v-model="streetAddress" :error="streetAddressError"
+                            errorMessage="Please enter street address" class="col-start-1" :readonly="!editMode" />
+
 
                         <DropDown label="Country/Region" v-model="country" :error="countryError"
                             errorMessage="Please select a country" :options="['Sri Lanka', 'Australia', 'India']"
@@ -351,8 +387,11 @@ const handleUpdate = async () => {
                             <h4 class="text-sm font-semibold text-gray-600">
                                 Select Your Location (Move the pin)
                             </h4>
-
-                            <img src="../../../assets/map.jpg" class="w-full h-full object-cover" alt="" />
+                            <GmapMap v-if="showMap" :center="mapCenter" :zoom="mapZoom" style="width: 100%; height: 400px;"
+                                @click="onMapClick">
+                                <GmapMarker :position="markerPosition" :draggable="editMode" @dragend="onMarkerDragend" />
+                            </GmapMap>
+                            <!-- <img src="../../../assets/map.jpg" class="w-full h-full object-cover" alt="" /> -->
                         </div>
                     </div>
                 </div>
