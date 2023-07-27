@@ -14,7 +14,8 @@ let development = process.env.NODE_ENV !== 'production'
 
 const axiosInstance = axios.create({
     // baseURL: development ? 'http://localhost:9000' : 'https://api.bloonsoo.com'
-    baseURL: 'http://localhost:9000' 
+    // baseURL: 'http://localhost:9000' 
+    baseURL: 'https://api.bloonsoo.com' 
     // baseURL: development ? 'https://api.bloonsoo.com' : 'https://api.bloonsoo.com'
 })
 
